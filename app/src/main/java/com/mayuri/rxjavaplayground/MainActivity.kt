@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.size
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mayuri.rxjavaplayground.databinding.ActivityMainBinding
 import io.reactivex.Observable
@@ -27,10 +28,7 @@ class MainActivity : AppCompatActivity() {
         Color.BLUE,
         Color.MAGENTA,
         Color.DKGRAY,
-        Color.YELLOW,
-        Color.GREEN,
-        Color.CYAN
-    )
+        Color.GREEN)
 
     lateinit var binding: ActivityMainBinding
 
@@ -93,6 +91,7 @@ class MainActivity : AppCompatActivity() {
                 consumingMessagesList.add(messages)
                 binding.rvConsumedMessage.adapter?.notifyDataSetChanged()
                 binding.rvUpcomingMessage.adapter?.notifyDataSetChanged()
+                binding.rvConsumedMessage.scrollToPosition( binding.rvUpcomingMessage.size)
 
             }, {
                 println("Received error Consuming -${it.message}")
@@ -142,24 +141,17 @@ class MainActivity : AppCompatActivity() {
 
             GlobalScope.launch() {
                 while (true) {
-                    val iterator = upcomingMessagesList.clone()
+                    val messages: ArrayList<MessageModel> = ArrayList()
+                    messages.addAll(upcomingMessagesList)
 
- /*                   while (iterator.hasNext()) {
-                        var item: MessageModel? = null
-                        try {
-                            item = iterator.next()
-                        } catch (e: Exception) {
+                    messages.forEachIndexed { index, i ->
+                        if (i!=null && i.date.time - Date().time <= 100) {
+                            upcomingMessagesList.removeAt(index)
+                            observer.onNext(i)
 
                         }
-                        try {
-                            if ( item?.date?.time?.minus(Date().time)!! <= 100) {
-                                observer.onNext(item)
-                                iterator.remove()
-                            }
+                    }
 
-                        } catch (e: Exception) {
-                        }
-                    }*/
                 }
             }
         }
