@@ -19,7 +19,9 @@
         android:id="@+id/upcoming_message"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Upcoming Messages\n \n"
+        android:gravity="center"
+
+        android:text="Upcoming Messages \n"
         app:layout_constraintEnd_toStartOf="@id/consumed_message"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/currentTime" />
@@ -28,10 +30,30 @@
         android:id="@+id/consumed_message"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Consumed Messages \n \n"
+        android:text="Consumed Messages \n "
+        android:gravity="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/upcoming_message"
         app:layout_constraintTop_toBottomOf="@id/currentTime" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_upcoming_message"
+
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Upcoming Messages\n \n"
+        app:layout_constraintEnd_toStartOf="@id/consumed_message"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/upcoming_message" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_consumed_message"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Consumed Messages \n \n"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/upcoming_message"
+        app:layout_constraintTop_toBottomOf="@id/consumed_message" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

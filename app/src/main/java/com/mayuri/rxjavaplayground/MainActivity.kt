@@ -3,10 +3,8 @@ package com.mayuri.rxjavaplayground
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
-import android.provider.Contacts
-import android.text.SpannableStringBuilder
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.text.color
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.mayuri.rxjavaplayground.databinding.ActivityMainBinding
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -15,6 +13,7 @@ import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 
 
 @SuppressLint("CheckResult")
@@ -26,40 +25,77 @@ class MainActivity : AppCompatActivity() {
         Color.RED,
         Color.GRAY,
         Color.BLUE,
-        Color.MAGENTA
+        Color.MAGENTA,
+        Color.DKGRAY,
+        Color.YELLOW,
+        Color.GREEN,
+        Color.CYAN
     )
 
     lateinit var binding: ActivityMainBinding
+
+    private var upcomingMessagesList = ArrayList<MessageModel>()
+    private var consumingMessagesList = ArrayList<MessageModel>()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        subscribeToObservable()
+        setUpRecyclerViews()
         updateCurrentTimeUsingRX()
+
+
+        subscribeToUpcomingObservable()
+        subscribeToConsumingObservable()
+
+    }
+
+    private fun setUpRecyclerViews() {
+
+        binding.rvUpcomingMessage.layoutManager = LinearLayoutManager(this)
+        binding.rvUpcomingMessage.adapter = MessagesRecyclerView(upcomingMessagesList)
+
+        binding.rvConsumedMessage.layoutManager = LinearLayoutManager(this)
+        binding.rvConsumedMessage.adapter = MessagesRecyclerView(consumingMessagesList)
+
     }
 
 
-    private fun subscribeToObservable() {
+    private fun subscribeToUpcomingObservable() {
         val messageStreamObserver = createObservableMessageStream();
         messageStreamObserver
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({ messageModel ->
-                println("Received - ${messageModel.message}")
-                println("Received on - ${Thread.currentThread().name}")
 
-                val s = SpannableStringBuilder()
-                    .color(messageModel.color) { append(messageModel.message) }
-                    .append("\n")
-                binding.upcomingMessage.append(s)
+                upcomingMessagesList.add(messageModel)
+                binding.rvUpcomingMessage.adapter?.notifyDataSetChanged()
 
-                //Emit messages when the difference time of the message and current time is <=100ms
-
-                println("Received with difference - ${messageModel.date.time - Date().time}")
 
             }, {
                 println("Received error -${it.message}")
+
+            }, {
+
+            }, {
+                println("on subscribed")
+
+            })
+    }
+
+    private fun subscribeToConsumingObservable() {
+        val messageStreamObserver = createObservableConsumingMessageStream();
+        messageStreamObserver
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ messages ->
+                println("Received on - ${Thread.currentThread().name}")
+                consumingMessagesList.add(messages)
+                binding.rvConsumedMessage.adapter?.notifyDataSetChanged()
+                binding.rvUpcomingMessage.adapter?.notifyDataSetChanged()
+
+            }, {
+                println("Received error Consuming -${it.message}")
 
             }, {
 
@@ -76,10 +112,8 @@ class MainActivity : AppCompatActivity() {
         return Observable.create() { observer ->
             println("🍄 ~~ Observable logic being triggered ~~")
 
-
             GlobalScope.launch() {
-
-                for (i in 0..12) {
+                while (true) {
                     delay(4000) //artificial delay 1 second
                     println("emitting on - ${Thread.currentThread().name}")
 
@@ -93,11 +127,39 @@ class MainActivity : AppCompatActivity() {
                         dateTime,
                         colorList.get(randomNum)
                     )
-
-                    println("${i} message -   : ${message.message} color -  ${message.color}")
                     observer.onNext(message)
 
 
+                }
+            }
+        }
+
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    private fun createObservableConsumingMessageStream(): Observable<MessageModel> {
+        return Observable.create() { observer ->
+
+            GlobalScope.launch() {
+                while (true) {
+                    val iterator = upcomingMessagesList.clone()
+
+ /*                   while (iterator.hasNext()) {
+                        var item: MessageModel? = null
+                        try {
+                            item = iterator.next()
+                        } catch (e: Exception) {
+
+                        }
+                        try {
+                            if ( item?.date?.time?.minus(Date().time)!! <= 100) {
+                                observer.onNext(item)
+                                iterator.remove()
+                            }
+
+                        } catch (e: Exception) {
+                        }
+                    }*/
                 }
             }
         }
