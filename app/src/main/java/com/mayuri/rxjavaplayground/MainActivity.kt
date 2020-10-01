@@ -166,7 +166,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun updateCurrentTimeUsingRX() {
-        Observable.interval(1000L, TimeUnit.MILLISECONDS)
+        Observable.interval(10L, TimeUnit.MILLISECONDS)
             .timeInterval()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {
